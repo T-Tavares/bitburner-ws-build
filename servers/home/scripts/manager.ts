@@ -1,6 +1,7 @@
 import {NS} from '@ns';
-// import {getServersRootAccess} from '../lib/servers/root-access';
-// import {hackLogic} from '../lib/servers/hack-logic';
+
+import {getServersRootAccess} from '../lib/servers/root-access';
+import {hackLogic} from '../lib/servers/hack-logic';
 import {timeToMS} from '../tools/conversions';
 
 export async function main(ns: NS): Promise<void> {
@@ -16,15 +17,15 @@ export async function main(ns: NS): Promise<void> {
             description: 'Get Root Access',
             delay: timeToMS({time: 1, unit: 'min'}),
             timecount: Date.now(),
-            fn: ns => ns.print('getServersRootAccess(ns)'),
-            // fn: ns => getServersRootAccess(ns),
+            // fn: ns => ns.print('getServersRootAccess(ns)'),
+            fn: ns => getServersRootAccess(ns),
         },
         {
             description: 'Best Target and Hacking',
             delay: timeToMS({time: 1, unit: 'min'}),
             timecount: Date.now(),
-            fn: ns => ns.print('hackLogic(ns)'),
-            // fn: ns => hackLogic(ns),
+            // fn: ns => ns.print('hackLogic(ns)'),
+            fn: ns => hackLogic(ns),
         },
     ];
 

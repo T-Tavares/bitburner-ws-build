@@ -1,7 +1,7 @@
 import {NS} from '@ns';
 import {myPortOpeners, openPorts} from '../ports';
 import {recServerScanAction} from './rec-scan';
-import {ServerContext} from 'models/t-servers';
+import {ServerContext} from './../../models/t-servers';
 
 // export async function main(ns: NS): Promise<void> {}
 

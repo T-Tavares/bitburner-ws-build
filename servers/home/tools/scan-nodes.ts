@@ -1,4 +1,4 @@
-import {NS, Server} from '@ns';
+import {NS} from '@ns';
 
 // ------------------------------------------------------ //
 // ------- SCAN AND PRINT SERVERS WITH ROOT ACCESS ------ //
