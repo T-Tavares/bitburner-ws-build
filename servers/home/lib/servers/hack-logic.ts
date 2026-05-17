@@ -1,4 +1,5 @@
 import {NS} from '@ns';
+import {recServerScanAction} from './rec-scan';
 
 // ------------------------------------------------------ //
 // ---------------------- CONSTANTS --------------------- //
@@ -9,13 +10,18 @@ const SCRIPT_PATH = '/scripts/hack.js';
 // ----------------- RUN HACK ON SERVERS ---------------- //
 
 export async function hackLogic(ns: NS) {
-    const target = getBestTarget(ns);
+    const target = await getBestTarget(ns);
     const serversRooted = await getAllServersRooted(ns);
 
     ns.tprint(`\n\n\nTarget: ${target}\nServers Rooted: ${serversRooted}\n\n\n`);
 
-    // ns.exec();
+    for (const s of serversRooted) {
+        // const threadsAvailable = await getAvailableThreads({ns, server: s, script: SCRIPT_PATH});
+        // ns.exec(SCRIPT_PATH, s, threadsAvailable);
+        await hackTarget({ns, host: s, script: SCRIPT_PATH, target});
+    }
 
+    // ns.exec();
     // const visited = new Set<string>();
     // await recServerScanAction({ns, server: 'home', visited, action});
 }
