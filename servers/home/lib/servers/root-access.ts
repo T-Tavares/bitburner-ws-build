@@ -3,8 +3,6 @@ import {myPortOpeners, openPorts} from '../ports';
 import {recServerScanAction} from './rec-scan';
 import {ServerContext} from './../../models/t-servers';
 
-// export async function main(ns: NS): Promise<void> {}
-
 // ------------------------------------------------------ //
 // --------------------- ROOT ACCESS -------------------- //
 // ------------------------ BLOCK ----------------------- //
@@ -42,6 +40,6 @@ export async function getServerAccess(ns: NS, server: string): Promise<void> {
         await openPorts(ns, server);
         ns.nuke(server);
         const gainedAccess = ns.hasRootAccess(server);
-        ns.print(`Server: ${server} Root Hacking Status: ${gainedAccess ? 'Success 🟢' : 'Fail 🔴'}`);
+        ns.tprint(`Server: ${server} Root Hacking Status: ${gainedAccess ? 'Success 🟢' : 'Fail 🔴'}`);
     }
 }

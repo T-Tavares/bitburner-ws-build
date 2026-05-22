@@ -1,7 +1,7 @@
 import {NS} from '@ns';
 
 import {getServersRootAccess} from '../lib/servers/root-access';
-import {hackLogic} from '../lib/servers/hack-logic';
+import {hackRootedServers} from '../lib/servers/hack-logic';
 import {timeToMS} from '../tools/conversions';
 
 export async function main(ns: NS): Promise<void> {
@@ -17,23 +17,39 @@ export async function main(ns: NS): Promise<void> {
             description: 'Get Root Access',
             delay: timeToMS({time: 30, unit: 'min'}),
             timecount: Date.now(),
-            // fn: ns => ns.print('getServersRootAccess(ns)'),
             fn: ns => getServersRootAccess(ns),
         },
         {
-            description: 'Best Target and Hacking',
-            delay: timeToMS({time: 40, unit: 'min'}),
+            description: 'Get Best Target and Hack Rooted Servers',
+            delay: timeToMS({time: 60, unit: 'min'}),
             timecount: Date.now(),
-            // fn: ns => ns.print('hackLogic(ns)'),
-            fn: ns => hackLogic(ns),
+            fn: ns => hackRootedServers(ns),
         },
     ];
 
+    // ------------------------------------------------------ //
+    // ------------- INITIAL RUN OF ALL SCRIPTS ------------- //
+    // ----------------- WHEN START MANAGER ----------------- //
+    // ------------------------------------------------------ //
+
     for (const task of managerTasks) {
-        ns.print(`Initial run: ${task.description}`);
+        const options: Intl.DateTimeFormatOptions = {
+            month: 'numeric',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        };
+
+        const timeNow = new Date().toLocaleString('en-NZ', options);
+
+        ns.tprint(`💙 Initial Run: ${task.description} at ${timeNow} 💙\n\n`);
         task.timecount = Date.now() + task.delay;
         await task.fn(ns);
     }
+
+    // ------------------------------------------------------ //
+    // -------------------- MANAGER LOOP -------------------- //
+    // ------------------------------------------------------ //
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -41,11 +57,20 @@ export async function main(ns: NS): Promise<void> {
 
         for (const task of managerTasks) {
             if (now >= task.timecount) {
-                ns.print(`Running: ${task.description}`);
+                const options: Intl.DateTimeFormatOptions = {
+                    month: 'numeric',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                };
+
+                const timeNow = new Date().toLocaleString('en-NZ', options);
+
+                ns.tprint(`\n\n💙 Running: ${task.description} at ${timeNow} 💙`);
                 task.timecount = now + task.delay;
                 await task.fn(ns);
             }
         }
-        await ns.sleep(timeToMS({time: 25, unit: 'min'}));
+        await ns.sleep(timeToMS({time: 1, unit: 'min'}));
     }
 }

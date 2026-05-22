@@ -1,5 +1,4 @@
 import {NS} from '@ns';
-import {recServerScanAction} from './rec-scan';
 
 // ------------------------------------------------------ //
 // ---------------------- CONSTANTS --------------------- //
@@ -9,50 +8,36 @@ const SCRIPT_PATH = '/scripts/hack.js';
 
 // ----------------- RUN HACK ON SERVERS ---------------- //
 
-export async function hackLogic(ns: NS) {
+export async function hackRootedServers(ns: NS) {
     const target = await getBestTarget(ns);
     const serversRooted = await getAllServersRooted(ns);
+    const serversHacked = new Set<string>();
+    const noThreadsServers = new Set<string>();
 
-    ns.tprint(`\n\n\nTarget: ${target}\nServers Rooted: ${serversRooted}\n\n\n`);
+    for (const server of serversRooted) {
+        ns.killall(server);
+        await updateHackFile({ns, script: SCRIPT_PATH, target: server});
 
-    for (const s of serversRooted) {
-        // const threadsAvailable = await getAvailableThreads({ns, server: s, script: SCRIPT_PATH});
-        // ns.exec(SCRIPT_PATH, s, threadsAvailable);
-        await hackTarget({ns, host: s, script: SCRIPT_PATH, target});
+        const threads = await getAvailableThreads({ns, server, script: SCRIPT_PATH});
+        if (threads !== 0) {
+            const PID = ns.exec(SCRIPT_PATH, server, threads, target);
+
+            if (PID !== 0) {
+                ns.print(`Hacking: ${server} - Threads: ${threads}`);
+                serversHacked.add(server);
+            } else ns.tprint(`Investigaste: 🔴 Could NOT Exec Hack On ${server}`);
+        } else noThreadsServers.add(server);
     }
 
-    // ns.exec();
-    // const visited = new Set<string>();
-    // await recServerScanAction({ns, server: 'home', visited, action});
-}
+    ns.tprint(` 🔍 Hack Details 🔍 
 
-// ------------------------------------------------------ //
-// --------------------- HACK TARGET -------------------- //
-// ------------------------------------------------------ //33
-interface HackTarget {
-    ns: NS;
-    host: string;
-    script: string;
-    target: string;
-}
-
-export async function hackTarget({ns, host, script, target}: HackTarget): Promise<void> {
-    ns.killall(host); //                                             Clean Up
-    await updateHackFile({ns, target, script}); //                       Updating Files
-
-    const availableThreads = await getAvailableThreads({ns, server: host, script});
-    if (availableThreads === 0) {
-        ns.tprint(`🟡 -- WARNING -- 🟡 : No RAM / Threads available on ${host}`);
-    } else {
-        const pid = ns.exec(script, host, availableThreads, target);
-        pid == 0
-            ? ns.tprint(
-                  `❌ --   FAIL  -- ❌ : To start script on ${host} targetting ${target} - Threads ${availableThreads}`,
-              )
-            : ns.tprint(
-                  `✅ -- SUCCESS -- ✅ : Started Script on ${host} targetting ${target} - Threads ${availableThreads}`,
-              );
-    }
+    No Threads available on servers: 
+    ${[...noThreadsServers]}
+    
+    Servers Rooted: ${serversRooted.length} --- Servers Hacked: ${[...serversHacked].length}
+    ${[...serversHacked]}
+        
+    `);
 }
 
 // ------------------------------------------------------ //
@@ -134,12 +119,12 @@ export async function getBestTarget(ns: NS): Promise<string> {
     const growth = ns.getServerGrowth(bestTarget);
     const availableMoney = ns.getServerMoneyAvailable(bestTarget);
 
-    ns.print(`--- Best Target ---`);
-    ns.print(`Server: ${bestTarget}`);
-    ns.print(`Max Money: ${maxMoney}`);
-    ns.print(`Available Money: ${availableMoney}`);
-    ns.print(`Security Lvl: ${security}`);
-    ns.print(`Growth: ${growth}`);
+    ns.tprint(` 🔍 Best Target Details 🔍 
+
+    Target Server: ${bestTarget}
+    Max Money: ${maxMoney} --- Available Money: ${availableMoney}
+    Security Lvl: ${security} --- Growth: ${growth}
+        `);
 
     return bestTarget;
 }
@@ -167,7 +152,5 @@ export async function getAllServersRooted(ns: NS): Promise<string[]> {
     await getServersRecursive('home');
 
     const hasRootFiltered = [...hasRoot].filter(s => !s.includes('home'));
-    ns.tprint(hasRootFiltered);
-
     return hasRootFiltered;
 }
