@@ -6,7 +6,10 @@ import {NS} from '@ns';
 
 const SCRIPT_PATH = '/scripts/hack.js';
 
+// ------------------------------------------------------ //
 // ----------------- RUN HACK ON SERVERS ---------------- //
+// ------------------- FOR BEST TARGET ------------------ //
+// ------------------------------------------------------ //
 
 export async function hackRootedServers(ns: NS) {
     const target = await getBestTarget(ns);
@@ -14,11 +17,15 @@ export async function hackRootedServers(ns: NS) {
     const serversHacked = new Set<string>();
     const noThreadsServers = new Set<string>();
 
+    // ------------- LOOP THROUGH ROOTED SERVERS ------------ //
+    // ------------------- AND HACK TARGET ------------------ //
+
     for (const server of serversRooted) {
         ns.killall(server);
         await updateHackFile({ns, script: SCRIPT_PATH, target: server});
 
         const threads = await getAvailableThreads({ns, server, script: SCRIPT_PATH});
+
         if (threads !== 0) {
             const PID = ns.exec(SCRIPT_PATH, server, threads, target);
 
@@ -28,6 +35,21 @@ export async function hackRootedServers(ns: NS) {
             } else ns.tprint(`Investigaste: 🔴 Could NOT Exec Hack On ${server}`);
         } else noThreadsServers.add(server);
     }
+
+    const homeThreads = await getAvailableThreads({ns, server: 'home', script: SCRIPT_PATH});
+
+    // -------- USING THE REMAIN RAM ON HOME TO HACK -------- //
+
+    if (homeThreads !== 0) {
+        const PID = ns.exec(SCRIPT_PATH, 'home', homeThreads, target);
+
+        if (PID !== 0) {
+            ns.print(`Hacking: ${target} - Threads: ${homeThreads}`);
+            serversHacked.add('home');
+        } else ns.tprint(`Investigaste: 🔴 Could NOT Exec Hack On ${'home'}`);
+    } else noThreadsServers.add('home');
+
+    // -------------- PRINT LOGS OF HACKING RUN ------------- //
 
     ns.tprint(` 🔍 Hack Details 🔍 
 

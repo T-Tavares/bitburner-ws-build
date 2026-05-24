@@ -1,8 +1,8 @@
 /** @param {NS} ns */
 import {NS} from '@ns';
 
-const SECURITY_LEVEL_BASELINE = 2; //   if script are stalling make it 0.8 or lower
-const MONEY_BASELINE = 0.9; //          if income is slow make it 0.95 or higher
+const SECURITY_LEVEL_BASELINE = 0.5; //   if script are stalling make it 0.8 or lower
+const MONEY_BASELINE = 0.98; //          if income is slow make it 0.95 or higher
 
 export async function main(ns: NS): Promise<void> {
     const target = ns.args[0] as string;
